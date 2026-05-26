@@ -52,6 +52,27 @@ def get_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     users = db.query(models.User).offset(skip).limit(limit).all()
     return users
 
+
+# YAHAN ADD HUA HAI NAYA UPDATE ROUTE 👇
+@app.patch("/users/{github_handle}", response_model=schemas.UserResponse)
+def update_user_profile(github_handle: str, profile_data: schemas.UserUpdate, db: Session = Depends(get_db)):
+    # 1. User ko database mein dhoondho
+    db_user = db.query(models.User).filter(models.User.github_handle == github_handle).first()
+    
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # 2. Jo naya data aaya hai (jo null nahi hai), usko user ke record mein daal do
+    update_data = profile_data.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(db_user, key, value)
+
+    # 3. Database mein save (commit) kar do
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+
 # --- Project Routes ---
 @app.post("/projects/", response_model=schemas.ProjectResponse)
 def create_project(project: schemas.ProjectCreate, db: Session = Depends(get_db)):
@@ -60,4 +81,3 @@ def create_project(project: schemas.ProjectCreate, db: Session = Depends(get_db)
     db.commit()
     db.refresh(db_project)
     return db_project
-

@@ -16,6 +16,12 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     pass 
 
+# YAHAN ADD HUA HAI NAYA UPDATE SCHEMA 👇
+class UserUpdate(BaseModel):
+    graduation_year: Optional[int] = None
+    academic_path: Optional[str] = None
+    primary_skills: Optional[List[str]] = None
+
 class UserResponse(UserBase):
     user_id: UUID
     created_at: datetime
