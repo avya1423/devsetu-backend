@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Depends, HTTPException
+from fastapi.middleware.cors import CORSMiddleware  # <-- CORS yahan import kiya hai
 from sqlalchemy.orm import Session
 from typing import List
 
@@ -12,6 +13,20 @@ models.Base.metadata.create_all(bind=engine)
 
 # Initialize FastAPI
 app = FastAPI(title="DevSetu API", description="Backend for the DevSetu platform")
+
+# --- CORS Middleware Setup (CORS error fix karne ke liye) ---
+origins = [
+    "http://localhost:3000",  # Aapka local frontend
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+# ------------------------------------------------------------
 
 @app.get("/")
 def root():
@@ -46,6 +61,4 @@ def create_project(project: schemas.ProjectCreate, db: Session = Depends(get_db)
     db.refresh(db_project)
     return db_project
 
-@app.get("/projects/", response_model=List[schemas.ProjectResponse])
-def get_projects(db: Session = Depends(get_db)):
-    return db.query(models.Project).all()
+@
